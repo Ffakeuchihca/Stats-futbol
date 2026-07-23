@@ -25,7 +25,7 @@ export default async function PlantelPage() {
     await Promise.all([
       activeCategoryId
         ? playersQuery.eq("role", "player").eq("player_categories.category_id", activeCategoryId)
-        : supabase.from("profiles").select("*").order("full_name"),
+        : supabase.from("profiles").select("*").eq("role", "player").order("full_name"),
       supabase.from("player_season_stats").select("*"),
       supabase.from("categories").select("*").order("name"),
       supabase.from("player_categories").select("player_id, category_id"),
