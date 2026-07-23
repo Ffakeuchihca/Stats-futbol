@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Club Stats
 
-## Getting Started
+Sistema web para gestionar el plantel: asistencia a entrenamientos, multas, estadísticas de
+partidos, autoevaluación de jugadores y scouting del rival.
 
-First, run the development server:
+## Stack
+
+- **Next.js 16** (App Router) + Tailwind CSS + shadcn/ui (Base UI)
+- **Supabase**: base de datos Postgres, autenticación y seguridad por fila (RLS)
+
+Es una web responsive: funciona igual desde PC, celular o tablet con el mismo navegador, sin
+instalar nada aparte.
+
+## 1. Crear el proyecto en Supabase
+
+1. Entrá a [supabase.com](https://supabase.com) y creá un proyecto nuevo (gratis).
+2. En **Project Settings → API** copiá la **Project URL** y la **anon public key**.
+3. En **SQL Editor**, ejecutá en orden los archivos de `supabase/migrations/` (`0001`, `0002`,
+   `0003`...). Esto crea todas las tablas, las vistas de estadísticas acumuladas, las
+   categorías y las reglas de seguridad (cada jugador ve/edita lo suyo, el cuerpo técnico
+   ve/edita todo, y solo un administrador puede cambiar roles o el catálogo de categorías).
+   Si tenés el MCP de Supabase conectado, pedile a Claude que las aplique directamente.
+
+## 2. Configurar las variables de entorno
+
+Copiá `.env.local.example` a `.env.local` y completá con los datos del paso anterior:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.local.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+```
+NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=tu-anon-key
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 3. Correr la app
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm install
+npm run dev
+```
 
-## Learn More
+Abrí [http://localhost:3000](http://localhost:3000).
 
-To learn more about Next.js, take a look at the following resources:
+- El primer usuario que se registra queda como **jugador** por defecto.
+- Para el primer administrador, entrá a Supabase → Table Editor → `profiles` y cambiá su
+  `role` a `admin`. Desde ahí, ese usuario puede promover a otros (coach/admin), asignar
+  categorías y usar el resto de las herramientas del cuerpo técnico directamente desde la app,
+  en **Plantel**.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Roles
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Jugador**: marca su propia asistencia, ve sus multas, carga su autoevaluación por partido.
+- **Cuerpo técnico (coach)**: todo lo del jugador, más CRUD completo de entrenamientos,
+  partidos, estadísticas y multas de todo el plantel; asigna categorías a los jugadores.
+- **Administrador**: todo lo del cuerpo técnico, más gestión del catálogo de categorías y la
+  posibilidad de cambiar el rol de cualquier usuario (protegido a nivel de base de datos: un
+  coach no puede auto-promoverse).
 
-## Deploy on Vercel
+## Módulos
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Asistencia**: cada jugador marca si llegó a horario o tarde; el cuerpo técnico gestiona el
+  día completo del plantel desde la pestaña "Tomar asistencia", y programa/edita/elimina
+  entrenamientos desde "Entrenamientos". Las multas por llegada tardía o ausencia injustificada
+  se generan automáticamente según el estado marcado.
+- **Calendario**: vista mensual con todos los entrenamientos y partidos programados; tocar un
+  día muestra el detalle y lleva directo a asistencia o al partido correspondiente.
+- **Multas**: catálogo de $1000 por falta de uniforme, ausencia injustificada, llegada tardía y
+  no llevar espinilleras, con edición, eliminación y seguimiento de pagado/pendiente.
+- **Partidos**: CRUD completo (crear, editar, eliminar) con convocado/titular/suplente, minutos,
+  goles, asistencias y tarjetas por jugador, acumulados automáticamente en **Plantel**.
+- **Plantel**: estadísticas acumuladas, categoría y rol de cada jugador; el administrador
+  gestiona el catálogo de categorías desde acá.
+- **Autoevaluación**: cada jugador se pone una nota de 1 a 5 por partido con comentario.
+- **Scouting rival**: sistema de juego, fortalezas y debilidades cargadas por el cuerpo técnico.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deploy
+
+La forma más simple es [Vercel](https://vercel.com/new) (gratis para este uso): importá el
+repo y cargá las mismas variables de entorno de `.env.local`.
