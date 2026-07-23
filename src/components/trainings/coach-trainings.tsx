@@ -10,8 +10,21 @@ import { TrainingDialog } from "@/components/trainings/training-dialog";
 import { toast } from "sonner";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
-import { Plus, Pencil, Trash2 } from "lucide-react";
-import type { Category, Training } from "@/types/database";
+import { Plus, Pencil, Trash2, ChevronDown, ChevronUp } from "lucide-react";
+import { cn } from "@/lib/utils";
+import type { AttendanceStatus, Category, Training } from "@/types/database";
+
+interface AttendanceDetail {
+  status: AttendanceStatus;
+  notes: string | null;
+  full_name: string;
+}
+
+const STATUS_LABEL: Record<AttendanceStatus, string> = {
+  presente: "Presente",
+  tarde: "Tarde",
+  ausente: "Ausente",
+};
 
 export function CoachTrainings({ activeCategoryId }: { activeCategoryId?: string | null }) {
   const supabase = createClient();
@@ -20,6 +33,9 @@ export function CoachTrainings({ activeCategoryId }: { activeCategoryId?: string
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoryIdsByTraining, setCategoryIdsByTraining] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(true);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [attendanceDetails, setAttendanceDetails] = useState<Record<string, AttendanceDetail[]>>({});
+  const [loadingDetails, setLoadingDetails] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -70,6 +86,30 @@ export function CoachTrainings({ activeCategoryId }: { activeCategoryId?: string
     })();
   }, [load]);
 
+  async function toggleExpand(trainingId: string) {
+    if (expandedId === trainingId) {
+      setExpandedId(null);
+      return;
+    }
+    setExpandedId(trainingId);
+    if (!attendanceDetails[trainingId]) {
+      setLoadingDetails(trainingId);
+      const { data } = await supabase
+        .from("attendance")
+        .select("status, notes, profile:profiles!attendance_player_id_fkey(full_name)")
+        .eq("training_id", trainingId);
+      const rows = ((data ?? []) as unknown as { status: AttendanceStatus; notes: string | null; profile: { full_name: string } | null }[])
+        .map((row) => ({
+          status: row.status,
+          notes: row.notes,
+          full_name: row.profile?.full_name ?? "-",
+        }))
+        .sort((a, b) => a.full_name.localeCompare(b.full_name));
+      setAttendanceDetails((prev) => ({ ...prev, [trainingId]: rows }));
+      setLoadingDetails(null);
+    }
+  }
+
   async function remove(training: Training) {
     const { error } = await supabase.from("trainings").delete().eq("id", training.id);
     if (error) {
@@ -101,45 +141,104 @@ export function CoachTrainings({ activeCategoryId }: { activeCategoryId?: string
           <div className="divide-y">
             {trainings.map((t) => {
               const catIds = categoryIdsByTraining[t.id] ?? [];
+              const expanded = expandedId === t.id;
+              const details = attendanceDetails[t.id];
               return (
-                <div key={t.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-                  <div className="flex flex-col">
-                    <Link
-                      href={`/asistencia?date=${t.date}&training=${t.id}`}
-                      className="font-medium hover:underline"
-                    >
-                      {format(parseISO(t.date), "EEEE d 'de' MMMM yyyy", { locale: es })}
-                    </Link>
-                    <div className="flex flex-wrap items-center gap-1">
-                      {catIds.length === 0 ? (
-                        <span className="text-xs text-muted-foreground">General</span>
-                      ) : (
-                        catIds.map((cid) => (
-                          <Badge key={cid} variant="outline" className="font-mono text-[10px]">
-                            {categories.find((c) => c.id === cid)?.name ?? "-"}
-                          </Badge>
-                        ))
+                <div key={t.id} className="flex flex-col gap-3 px-4 py-3">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex flex-col">
+                      <Link
+                        href={`/asistencia?date=${t.date}&training=${t.id}`}
+                        className="font-medium hover:underline"
+                      >
+                        {format(parseISO(t.date), "EEEE d 'de' MMMM yyyy", { locale: es })}
+                      </Link>
+                      <div className="flex flex-wrap items-center gap-1">
+                        {catIds.length === 0 ? (
+                          <span className="text-xs text-muted-foreground">General</span>
+                        ) : (
+                          catIds.map((cid) => (
+                            <Badge key={cid} variant="outline" className="font-mono text-[10px]">
+                              {categories.find((c) => c.id === cid)?.name ?? "-"}
+                            </Badge>
+                          ))
+                        )}
+                      </div>
+                      {t.notes && <span className="text-sm text-muted-foreground">{t.notes}</span>}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button type="button" onClick={() => toggleExpand(t.id)}>
+                        <Badge
+                          variant="secondary"
+                          className="flex cursor-pointer items-center gap-1 hover:bg-muted-foreground/20"
+                        >
+                          {attendanceCounts[t.id] ?? 0} registros
+                          {expanded ? (
+                            <ChevronUp className="size-3" />
+                          ) : (
+                            <ChevronDown className="size-3" />
+                          )}
+                        </Badge>
+                      </button>
+                      <TrainingDialog
+                        training={t}
+                        categories={categories}
+                        initialCategoryIds={catIds}
+                        onSaved={load}
+                        trigger={
+                          <Button variant="ghost" size="sm">
+                            <Pencil className="size-4" />
+                          </Button>
+                        }
+                      />
+                      <Button variant="ghost" size="sm" onClick={() => remove(t)}>
+                        <Trash2 className="size-4" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  {expanded && (
+                    <div className="rounded-lg border bg-muted/30 p-3">
+                      {loadingDetails === t.id && (
+                        <p className="text-sm text-muted-foreground">Cargando...</p>
+                      )}
+                      {loadingDetails !== t.id && details && details.length === 0 && (
+                        <p className="text-sm text-muted-foreground">
+                          Todavía nadie tiene asistencia marcada en este entrenamiento.
+                        </p>
+                      )}
+                      {loadingDetails !== t.id && details && details.length > 0 && (
+                        <ul className="flex flex-col gap-1.5">
+                          {details.map((d, i) => (
+                            <li
+                              key={i}
+                              className="flex items-center justify-between gap-3 text-sm"
+                            >
+                              <span className="truncate">{d.full_name}</span>
+                              <span className="flex items-center gap-2">
+                                {d.status === "ausente" && d.notes && (
+                                  <span className="text-xs text-muted-foreground">
+                                    {d.notes}
+                                  </span>
+                                )}
+                                <Badge
+                                  variant="outline"
+                                  className={cn(
+                                    "font-mono text-[10px]",
+                                    d.status === "presente" && "border-primary text-primary",
+                                    d.status === "tarde" && "border-card-yellow text-card-yellow",
+                                    d.status === "ausente" && "border-card-red text-card-red"
+                                  )}
+                                >
+                                  {STATUS_LABEL[d.status]}
+                                </Badge>
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
                       )}
                     </div>
-                    {t.notes && <span className="text-sm text-muted-foreground">{t.notes}</span>}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary">{attendanceCounts[t.id] ?? 0} registros</Badge>
-                    <TrainingDialog
-                      training={t}
-                      categories={categories}
-                      initialCategoryIds={catIds}
-                      onSaved={load}
-                      trigger={
-                        <Button variant="ghost" size="sm">
-                          <Pencil className="size-4" />
-                        </Button>
-                      }
-                    />
-                    <Button variant="ghost" size="sm" onClick={() => remove(t)}>
-                      <Trash2 className="size-4" />
-                    </Button>
-                  </div>
+                  )}
                 </div>
               );
             })}

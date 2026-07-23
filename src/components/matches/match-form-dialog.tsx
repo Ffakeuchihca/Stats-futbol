@@ -73,6 +73,10 @@ export function MatchFormDialog({
 
   async function handleSave() {
     if (!opponent.trim()) return;
+    if (categoryIds.length === 0) {
+      toast.error("Elegí al menos una categoría");
+      return;
+    }
     setSubmitting(true);
 
     if (match) {
@@ -142,12 +146,16 @@ export function MatchFormDialog({
               onToggle={toggleCategory}
             />
             <p className="text-xs text-muted-foreground">
-              Si no marcás ninguna, el partido queda visible para todo el plantel.
+              Cada partido tiene que quedar asignado a una categoría, con su propio marcador y
+              planilla de jugadores.
             </p>
           </div>
         </div>
         <DialogFooter>
-          <Button onClick={handleSave} disabled={submitting || !opponent.trim()}>
+          <Button
+            onClick={handleSave}
+            disabled={submitting || !opponent.trim() || categoryIds.length === 0}
+          >
             {match ? "Guardar cambios" : "Crear partido"}
           </Button>
         </DialogFooter>

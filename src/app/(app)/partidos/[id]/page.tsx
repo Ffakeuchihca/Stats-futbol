@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile, isCoachRole } from "@/lib/supabase/profile";
+import { costaRicaTrainingDate } from "@/lib/costa-rica-date";
 import { MatchHeader } from "@/components/matches/match-header";
 import { MatchStatsTable } from "@/components/matches/match-stats-table";
 import { SelfEvaluationSection } from "@/components/matches/self-evaluation";
@@ -82,6 +83,7 @@ export default async function MatchDetailPage({
             initialStats={(stats ?? []) as MatchStat[]}
             canEdit={coach}
             currentPlayerId={userId}
+            isMatchDay={(match as Match).date === costaRicaTrainingDate()}
           />
         </TabsContent>
 

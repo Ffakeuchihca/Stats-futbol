@@ -37,12 +37,14 @@ export function MatchStatsTable({
   initialStats,
   canEdit,
   currentPlayerId,
+  isMatchDay,
 }: {
   matchId: string;
   players: Profile[];
   initialStats: MatchStat[];
   canEdit: boolean;
   currentPlayerId: string;
+  isMatchDay: boolean;
 }) {
   const supabase = createClient();
   const initialMap: Record<string, StatFields> = {};
@@ -136,7 +138,7 @@ export function MatchStatsTable({
           <tbody className="divide-y">
             {visiblePlayers.map((p) => {
               const r = rows[p.id];
-              const disabled = !canEdit && p.id !== currentPlayerId;
+              const disabled = !canEdit && (p.id !== currentPlayerId || !isMatchDay);
               return (
                 <tr key={p.id} className={savingId === p.id ? "opacity-60" : ""}>
                   <td className="whitespace-nowrap px-3 py-2 font-medium">{p.full_name}</td>
@@ -226,8 +228,9 @@ export function MatchStatsTable({
 
       {!canEdit && (
         <p className="text-xs text-muted-foreground">
-          Cargá tus propias estadísticas de este partido. El cuerpo técnico puede revisarlas y
-          corregirlas si hace falta.
+          {isMatchDay
+            ? "Cargá tus propias estadísticas de este partido. El cuerpo técnico puede revisarlas y corregirlas si hace falta."
+            : "Solo podés cargar tu estadística el día del partido."}
         </p>
       )}
     </div>
