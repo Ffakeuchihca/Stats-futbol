@@ -75,7 +75,21 @@ Abrí [http://localhost:3000](http://localhost:3000).
 - **Autoevaluación**: cada jugador se pone una nota de 1 a 5 por partido con comentario.
 - **Scouting rival**: sistema de juego, fortalezas y debilidades cargadas por el cuerpo técnico.
 
-## Deploy
+## Deploy en Vercel
 
-La forma más simple es [Vercel](https://vercel.com/new) (gratis para este uso): importá el
-repo y cargá las mismas variables de entorno de `.env.local`.
+1. Andá a [vercel.com/new](https://vercel.com/new) e importá el repo `Stats-futbol`. El
+   `package.json` está en la raíz del repo, así que Vercel detecta Next.js automáticamente sin
+   tocar el "Root Directory".
+2. En **Environment Variables**, cargá las dos mismas que tenés en `.env.local`:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+3. Dale a **Deploy**. Con eso ya queda funcionando.
+4. **Después del primer deploy**, copiá la URL que te dio Vercel (ej.
+   `https://stats-futbol.vercel.app`) y configurala en Supabase → **Authentication → URL
+   Configuration**:
+   - **Site URL**: la URL de Vercel.
+   - **Redirect URLs**: agregá esa misma URL (y `http://localhost:3000` si querés seguir
+     probando en local).
+   Esto es necesario para que los links de confirmación de email y de recuperar contraseña
+   apunten al sitio correcto en vez de a `localhost`.
+5. Cada `git push` a `main` dispara un deploy nuevo automáticamente.
