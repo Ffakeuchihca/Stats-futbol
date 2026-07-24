@@ -165,6 +165,10 @@
   ::selection {
     @apply bg-primary/25;
   }
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
 }
 
 @layer utilities {

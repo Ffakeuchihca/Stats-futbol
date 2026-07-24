@@ -117,6 +117,9 @@ export function CoachFines({
   }
 
   async function removeFine(id: string) {
+    if (!window.confirm("¿Eliminar esta multa? Esta acción no se puede deshacer.")) {
+      return;
+    }
     const { error } = await supabase.from("fines").delete().eq("id", id);
     if (error) {
       toast.error("No se pudo eliminar la multa");

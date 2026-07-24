@@ -99,7 +99,7 @@ export function EditPlayerDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button variant="ghost" size="sm" />}>
+      <DialogTrigger render={<Button variant="ghost" size="icon" aria-label={`Editar a ${player.full_name}`} />}>
         <Pencil className="size-4" />
       </DialogTrigger>
       <DialogContent>

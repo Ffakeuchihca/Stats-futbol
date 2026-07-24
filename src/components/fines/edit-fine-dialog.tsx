@@ -86,7 +86,7 @@ export function EditFineDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger
         render={
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="icon" aria-label="Editar multa">
             <Pencil className="size-4" />
           </Button>
         }

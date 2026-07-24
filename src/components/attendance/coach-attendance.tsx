@@ -364,6 +364,8 @@ export function CoachAttendance({
                       <button
                         type="button"
                         title="Falta de uniforme"
+                        aria-label="Falta de uniforme"
+                        aria-pressed={hasUniforme}
                         onClick={() => toggleManualFine(player.id, "sin_uniforme")}
                         className={cn(
                           "flex size-8 items-center justify-center rounded-lg border transition-colors",
@@ -377,6 +379,8 @@ export function CoachAttendance({
                       <button
                         type="button"
                         title="Sin espinilleras"
+                        aria-label="Sin espinilleras"
+                        aria-pressed={hasEspinilleras}
                         onClick={() => toggleManualFine(player.id, "sin_espinilleras")}
                         className={cn(
                           "flex size-8 items-center justify-center rounded-lg border transition-colors",

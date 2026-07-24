@@ -89,13 +89,23 @@ export function CalendarView({
               {format(month, "MMMM yyyy", { locale: es })}
             </h2>
             <div className="flex items-center gap-1">
-              <Button variant="outline" size="icon-sm" onClick={() => setMonth((m) => subMonths(m, 1))}>
+              <Button
+                variant="outline"
+                size="icon-sm"
+                aria-label="Mes anterior"
+                onClick={() => setMonth((m) => subMonths(m, 1))}
+              >
                 <ChevronLeft className="size-4" />
               </Button>
               <Button variant="outline" size="sm" onClick={() => setMonth(startOfMonth(new Date()))}>
                 Hoy
               </Button>
-              <Button variant="outline" size="icon-sm" onClick={() => setMonth((m) => addMonths(m, 1))}>
+              <Button
+                variant="outline"
+                size="icon-sm"
+                aria-label="Mes siguiente"
+                onClick={() => setMonth((m) => addMonths(m, 1))}
+              >
                 <ChevronRight className="size-4" />
               </Button>
             </div>
@@ -131,6 +141,8 @@ export function CalendarView({
                   key={key}
                   type="button"
                   onClick={() => setSelected(day)}
+                  aria-current={active ? "date" : undefined}
+                  aria-label={format(day, "EEEE d 'de' MMMM", { locale: es })}
                   className={cn(
                     "flex min-h-20 flex-col items-start gap-1 rounded-lg border p-1.5 text-left transition-colors sm:min-h-24",
                     inMonth ? "bg-background" : "bg-muted/30 text-muted-foreground",

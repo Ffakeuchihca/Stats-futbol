@@ -111,6 +111,13 @@ export function CoachTrainings({ activeCategoryId }: { activeCategoryId?: string
   }
 
   async function remove(training: Training) {
+    if (
+      !window.confirm(
+        `¿Eliminar el entrenamiento del ${format(parseISO(training.date), "d 'de' MMMM", { locale: es })}? Esta acción no se puede deshacer.`
+      )
+    ) {
+      return;
+    }
     const { error } = await supabase.from("trainings").delete().eq("id", training.id);
     if (error) {
       toast.error("No se pudo eliminar el entrenamiento", { description: error.message });
@@ -167,10 +174,15 @@ export function CoachTrainings({ activeCategoryId }: { activeCategoryId?: string
                       {t.notes && <span className="text-sm text-muted-foreground">{t.notes}</span>}
                     </div>
                     <div className="flex items-center gap-2">
-                      <button type="button" onClick={() => toggleExpand(t.id)}>
+                      <button
+                        type="button"
+                        onClick={() => toggleExpand(t.id)}
+                        aria-expanded={expanded}
+                        aria-label={expanded ? "Ocultar asistencia" : "Ver asistencia"}
+                      >
                         <Badge
                           variant="secondary"
-                          className="flex cursor-pointer items-center gap-1 hover:bg-muted-foreground/20"
+                          className="flex items-center gap-1 hover:bg-muted-foreground/20"
                         >
                           {attendanceCounts[t.id] ?? 0} registros
                           {expanded ? (
@@ -186,12 +198,17 @@ export function CoachTrainings({ activeCategoryId }: { activeCategoryId?: string
                         initialCategoryIds={catIds}
                         onSaved={load}
                         trigger={
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="icon" aria-label="Editar entrenamiento">
                             <Pencil className="size-4" />
                           </Button>
                         }
                       />
-                      <Button variant="ghost" size="sm" onClick={() => remove(t)}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Eliminar entrenamiento"
+                        onClick={() => remove(t)}
+                      >
                         <Trash2 className="size-4" />
                       </Button>
                     </div>

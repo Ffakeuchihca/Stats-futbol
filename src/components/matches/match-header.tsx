@@ -78,12 +78,18 @@ export function MatchHeader({
                   categories={categories}
                   initialCategoryIds={initialCategoryIds}
                   trigger={
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="icon" aria-label="Editar partido">
                       <Pencil className="size-4" />
                     </Button>
                   }
                 />
-                <Button variant="ghost" size="sm" onClick={handleDelete} disabled={deleting}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Eliminar partido"
+                  onClick={handleDelete}
+                  disabled={deleting}
+                >
                   <Trash2 className="size-4" />
                 </Button>
               </div>
