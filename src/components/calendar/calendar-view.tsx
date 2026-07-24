@@ -144,7 +144,7 @@ export function CalendarView({
                   aria-current={active ? "date" : undefined}
                   aria-label={format(day, "EEEE d 'de' MMMM", { locale: es })}
                   className={cn(
-                    "flex min-h-20 flex-col items-start gap-1 rounded-lg border p-1.5 text-left transition-colors sm:min-h-24",
+                    "flex min-h-20 flex-col items-start gap-1 rounded-lg border p-1.5 text-left outline-none transition-all duration-150 hover:border-primary/40 focus-visible:ring-2 focus-visible:ring-ring sm:min-h-24",
                     inMonth ? "bg-background" : "bg-muted/30 text-muted-foreground",
                     active && "border-primary ring-1 ring-primary"
                   )}

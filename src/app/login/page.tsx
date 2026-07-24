@@ -81,7 +81,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative flex flex-1 items-center justify-center overflow-hidden bg-pitch p-4">
+    <div className="bg-pitch-gradient relative flex flex-1 items-center justify-center overflow-hidden p-4">
       <svg
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 h-full w-full text-pitch-foreground opacity-[0.08]"

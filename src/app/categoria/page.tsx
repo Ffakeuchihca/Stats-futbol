@@ -17,7 +17,7 @@ export default async function CategoriaPage() {
   const categoryList = (categories ?? []) as Category[];
 
   return (
-    <div className="relative flex flex-1 items-center justify-center overflow-hidden bg-pitch p-4">
+    <div className="bg-pitch-gradient relative flex flex-1 items-center justify-center overflow-hidden p-4">
       <svg
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 h-full w-full text-pitch-foreground opacity-[0.08]"
@@ -49,7 +49,7 @@ export default async function CategoriaPage() {
               <form key={category.id} action={setActiveCategory.bind(null, category.id)}>
                 <button
                   type="submit"
-                  className="flex w-full items-center justify-between rounded-lg border px-4 py-3.5 text-left transition-colors hover:border-primary hover:bg-primary/5"
+                  className="flex w-full items-center justify-between rounded-lg border px-4 py-3.5 text-left outline-none transition-all duration-150 hover:border-primary hover:bg-primary/5 hover:shadow-card focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   <span className="font-display text-2xl leading-none">{category.name}</span>
                   <ArrowRight className="size-4 text-muted-foreground" />

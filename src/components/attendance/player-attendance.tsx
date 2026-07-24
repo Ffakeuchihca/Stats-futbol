@@ -171,7 +171,7 @@ export function PlayerAttendance({ playerId }: { playerId: string }) {
                   type="button"
                   onClick={() => mark(session.id, "presente")}
                   className={cn(
-                    "rounded-lg border px-4 py-2 text-sm font-medium transition-colors",
+                    "rounded-lg border px-4 py-2 text-sm font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
                     status === "presente" ? "bg-primary text-primary-foreground" : "hover:bg-muted"
                   )}
                 >
@@ -181,7 +181,7 @@ export function PlayerAttendance({ playerId }: { playerId: string }) {
                   type="button"
                   onClick={() => mark(session.id, "tarde")}
                   className={cn(
-                    "rounded-lg border px-4 py-2 text-sm font-medium transition-colors",
+                    "rounded-lg border px-4 py-2 text-sm font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
                     status === "tarde" ? "bg-card-yellow text-card-yellow-foreground" : "hover:bg-muted"
                   )}
                 >
@@ -191,7 +191,7 @@ export function PlayerAttendance({ playerId }: { playerId: string }) {
                   type="button"
                   onClick={() => openAbsenceDialog(session.id)}
                   className={cn(
-                    "rounded-lg border px-4 py-2 text-sm font-medium transition-colors",
+                    "rounded-lg border px-4 py-2 text-sm font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
                     status === "ausente" ? "bg-card-red text-card-red-foreground" : "hover:bg-muted"
                   )}
                 >

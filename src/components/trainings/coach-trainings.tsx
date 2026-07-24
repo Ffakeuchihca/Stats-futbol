@@ -179,6 +179,7 @@ export function CoachTrainings({ activeCategoryId }: { activeCategoryId?: string
                         onClick={() => toggleExpand(t.id)}
                         aria-expanded={expanded}
                         aria-label={expanded ? "Ocultar asistencia" : "Ver asistencia"}
+                        className="rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       >
                         <Badge
                           variant="secondary"

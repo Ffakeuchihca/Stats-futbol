@@ -272,7 +272,7 @@ export function CoachAttendance({
                   type="button"
                   onClick={() => selectSession(s.id)}
                   className={cn(
-                    "rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors",
+                    "rounded-lg border px-3 py-1.5 text-xs font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
                     selectedTrainingId === s.id
                       ? "border-primary bg-primary/10 text-primary"
                       : "text-muted-foreground hover:bg-muted"
@@ -346,7 +346,7 @@ export function CoachAttendance({
                                 : handleStatusChange(player.id, opt.value)
                             }
                             className={cn(
-                              "px-3 py-1.5 text-xs font-medium transition-colors",
+                              "px-3 py-1.5 text-xs font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
                               status === opt.value
                                 ? opt.value === "presente"
                                   ? "bg-primary text-primary-foreground"
@@ -368,7 +368,7 @@ export function CoachAttendance({
                         aria-pressed={hasUniforme}
                         onClick={() => toggleManualFine(player.id, "sin_uniforme")}
                         className={cn(
-                          "flex size-8 items-center justify-center rounded-lg border transition-colors",
+                          "flex size-8 items-center justify-center rounded-lg border outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
                           hasUniforme
                             ? "border-destructive bg-destructive/10 text-destructive"
                             : "text-muted-foreground hover:bg-muted"
@@ -383,7 +383,7 @@ export function CoachAttendance({
                         aria-pressed={hasEspinilleras}
                         onClick={() => toggleManualFine(player.id, "sin_espinilleras")}
                         className={cn(
-                          "flex size-8 items-center justify-center rounded-lg border transition-colors",
+                          "flex size-8 items-center justify-center rounded-lg border outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
                           hasEspinilleras
                             ? "border-destructive bg-destructive/10 text-destructive"
                             : "text-muted-foreground hover:bg-muted"

@@ -14,6 +14,12 @@ const TONE_TEXT: Record<string, string> = {
   danger: "text-card-red",
 };
 
+const TONE_ICON: Record<string, string> = {
+  default: "bg-primary/10 text-primary",
+  warning: "bg-card-yellow/15 text-amber-700 dark:text-card-yellow",
+  danger: "bg-card-red/10 text-card-red",
+};
+
 export function StatCard({
   label,
   value,
@@ -45,7 +51,12 @@ export function StatCard({
           </span>
           {hint && <span className="text-xs text-muted-foreground">{hint}</span>}
         </div>
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+        <div
+          className={cn(
+            "flex size-9 shrink-0 items-center justify-center rounded-lg",
+            TONE_ICON[tone]
+          )}
+        >
           <Icon className="size-5" />
         </div>
       </CardContent>

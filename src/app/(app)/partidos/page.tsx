@@ -72,8 +72,8 @@ export default async function PartidosPage() {
           const played = match.date < today;
           const matchCategoryIds = categoryIdsByMatch.get(match.id) ?? [];
           return (
-            <Link key={match.id} href={`/partidos/${match.id}`}>
-              <Card className="transition-colors hover:bg-muted/40">
+            <Link key={match.id} href={`/partidos/${match.id}`} className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl">
+              <Card className="transition-all duration-200 hover:-translate-y-0.5 hover:bg-muted/40 hover:shadow-[0_1px_2px_oklch(0.2_0.03_258/8%),0_16px_32px_-16px_oklch(0.2_0.03_258/28%)]">
                 <CardContent className="flex items-center justify-between gap-3">
                   <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-2">

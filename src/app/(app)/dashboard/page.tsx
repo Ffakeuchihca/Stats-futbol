@@ -120,7 +120,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="relative overflow-hidden rounded-2xl bg-pitch p-6 text-pitch-foreground sm:p-8">
+      <div className="bg-pitch-gradient shadow-card relative overflow-hidden rounded-2xl p-6 text-pitch-foreground sm:p-8">
         <svg
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.14]"
