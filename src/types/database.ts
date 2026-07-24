@@ -1,5 +1,5 @@
 export type UserRole = "player" | "coach" | "admin";
-export type AttendanceStatus = "presente" | "tarde" | "ausente";
+export type AttendanceStatus = "presente" | "tarde" | "ausente" | "lesionado";
 
 export interface Profile {
   id: string;

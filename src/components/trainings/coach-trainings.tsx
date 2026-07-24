@@ -24,6 +24,7 @@ const STATUS_LABEL: Record<AttendanceStatus, string> = {
   presente: "Presente",
   tarde: "Tarde",
   ausente: "Ausente",
+  lesionado: "Lesionado",
 };
 
 export function CoachTrainings({ activeCategoryId }: { activeCategoryId?: string | null }) {
@@ -245,7 +246,9 @@ export function CoachTrainings({ activeCategoryId }: { activeCategoryId?: string
                                     "font-mono text-[10px]",
                                     d.status === "presente" && "border-primary text-primary",
                                     d.status === "tarde" && "border-card-yellow text-card-yellow",
-                                    d.status === "ausente" && "border-card-red text-card-red"
+                                    d.status === "ausente" && "border-card-red text-card-red",
+                                    d.status === "lesionado" &&
+                                      "border-status-injured text-status-injured"
                                   )}
                                 >
                                   {STATUS_LABEL[d.status]}

@@ -15,6 +15,8 @@
   --color-card-yellow-foreground: var(--card-yellow-foreground);
   --color-card-red: var(--card-red);
   --color-card-red-foreground: var(--card-red-foreground);
+  --color-status-injured: var(--status-injured);
+  --color-status-injured-foreground: var(--status-injured-foreground);
   --color-pitch: var(--pitch);
   --color-pitch-foreground: var(--pitch-foreground);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -89,6 +91,10 @@
   --card-red: oklch(0.55 0.2 25);
   --card-red-foreground: oklch(0.99 0.005 25);
 
+  /* Injured: violet, deliberately distinct from the card colors and primary blue */
+  --status-injured: oklch(0.55 0.14 300);
+  --status-injured-foreground: oklch(0.99 0.005 300);
+
   /* Pitch: deep club navy, used for the dugout-style chrome */
   --pitch: oklch(0.22 0.09 258);
   --pitch-foreground: oklch(0.97 0.01 258);
@@ -137,6 +143,9 @@
   --card-yellow-foreground: oklch(0.2 0.04 95);
   --card-red: oklch(0.65 0.2 25);
   --card-red-foreground: oklch(0.16 0.02 25);
+
+  --status-injured: oklch(0.62 0.14 300);
+  --status-injured-foreground: oklch(0.14 0.03 300);
 
   --pitch: oklch(0.19 0.08 258);
   --pitch-foreground: oklch(0.97 0.01 258);

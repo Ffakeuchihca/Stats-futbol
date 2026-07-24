@@ -26,6 +26,7 @@ const STATUS_LABEL: Record<AttendanceStatus, string> = {
   presente: "Presente",
   tarde: "Tarde",
   ausente: "Ausente",
+  lesionado: "Lesionado",
 };
 
 interface SessionEntry {
@@ -197,6 +198,18 @@ export function PlayerAttendance({ playerId }: { playerId: string }) {
                 >
                   Voy a faltar
                 </button>
+                <button
+                  type="button"
+                  onClick={() => mark(session.id, "lesionado")}
+                  className={cn(
+                    "rounded-lg border px-4 py-2 text-sm font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
+                    status === "lesionado"
+                      ? "bg-status-injured text-status-injured-foreground"
+                      : "hover:bg-muted"
+                  )}
+                >
+                  Estoy lesionado
+                </button>
                 {status && <Badge variant="secondary">Registrado como {STATUS_LABEL[status]}</Badge>}
                 {status === "ausente" && entry?.notes && (
                   <button
@@ -240,7 +253,14 @@ export function PlayerAttendance({ playerId }: { playerId: string }) {
                           ? "default"
                           : row.status === "tarde"
                           ? "secondary"
+                          : row.status === "lesionado"
+                          ? "outline"
                           : "destructive"
+                      }
+                      className={
+                        row.status === "lesionado"
+                          ? "border-status-injured text-status-injured"
+                          : undefined
                       }
                     >
                       {STATUS_LABEL[row.status]}

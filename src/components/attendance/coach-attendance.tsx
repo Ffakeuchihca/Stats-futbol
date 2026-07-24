@@ -31,7 +31,15 @@ const STATUS_OPTIONS: { value: AttendanceStatus; label: string }[] = [
   { value: "presente", label: "Presente" },
   { value: "tarde", label: "Tarde" },
   { value: "ausente", label: "Ausente" },
+  { value: "lesionado", label: "Lesionado" },
 ];
+
+const STATUS_ACTIVE_CLASS: Record<AttendanceStatus, string> = {
+  presente: "bg-primary text-primary-foreground",
+  tarde: "bg-card-yellow text-card-yellow-foreground",
+  ausente: "bg-card-red text-card-red-foreground",
+  lesionado: "bg-status-injured text-status-injured-foreground",
+};
 
 export function CoachAttendance({
   players,
@@ -348,11 +356,7 @@ export function CoachAttendance({
                             className={cn(
                               "px-3 py-1.5 text-xs font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
                               status === opt.value
-                                ? opt.value === "presente"
-                                  ? "bg-primary text-primary-foreground"
-                                  : opt.value === "tarde"
-                                  ? "bg-card-yellow text-card-yellow-foreground"
-                                  : "bg-card-red text-card-red-foreground"
+                                ? STATUS_ACTIVE_CLASS[opt.value]
                                 : "bg-transparent hover:bg-muted"
                             )}
                           >

@@ -14,11 +14,18 @@ import {
   Users,
   ArrowRight,
 } from "lucide-react";
-import type { PlayerFinesSummary, PlayerSeasonStats } from "@/types/database";
+import type { AttendanceStatus, PlayerFinesSummary, PlayerSeasonStats } from "@/types/database";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { costaRicaTrainingDate } from "@/lib/costa-rica-date";
 import { getActiveCategoryId } from "@/lib/active-category";
+
+const ATTENDANCE_LABEL: Record<AttendanceStatus, string> = {
+  presente: "Presente",
+  tarde: "Tarde",
+  ausente: "Ausente",
+  lesionado: "Lesionado",
+};
 
 export default async function DashboardPage() {
   const { userId, profile } = await getCurrentProfile();
@@ -54,7 +61,7 @@ export default async function DashboardPage() {
   ]);
   const hasTrainingToday = (todayTrainings ?? []).length > 0;
 
-  let myAttendanceToday: string | null = null;
+  let myAttendanceToday: AttendanceStatus | null = null;
   if (todayTrainings && todayTrainings.length > 0) {
     const { data } = await supabase
       .from("attendance")
@@ -162,16 +169,14 @@ export default async function DashboardPage() {
           <>
             <StatCard
               label="Asistencia de hoy"
-              value={
-                myAttendanceToday
-                  ? myAttendanceToday === "presente"
-                    ? "Presente"
-                    : myAttendanceToday === "tarde"
-                    ? "Tarde"
-                    : "Ausente"
-                  : "Sin marcar"
+              value={myAttendanceToday ? ATTENDANCE_LABEL[myAttendanceToday] : "Sin marcar"}
+              tone={
+                myAttendanceToday === "ausente"
+                  ? "danger"
+                  : myAttendanceToday === "tarde"
+                  ? "warning"
+                  : "default"
               }
-              tone={myAttendanceToday === "ausente" ? "danger" : myAttendanceToday === "tarde" ? "warning" : "default"}
               icon={CalendarCheck}
             />
             <StatCard
