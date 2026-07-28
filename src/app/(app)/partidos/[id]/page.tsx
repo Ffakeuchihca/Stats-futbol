@@ -55,10 +55,13 @@ export default async function MatchDetailPage({
       .filter((pc) => matchCategoryIds.includes(pc.category_id))
       .map((pc) => pc.player_id)
   );
+  const playerIdsWithAnyCategory = new Set((playerCategories ?? []).map((pc) => pc.player_id));
   const relevantPlayers =
     matchCategoryIds.length === 0
       ? ((players ?? []) as Profile[])
-      : ((players ?? []) as Profile[]).filter((p) => playerIdsInMatchCategories.has(p.id));
+      : ((players ?? []) as Profile[]).filter(
+          (p) => playerIdsInMatchCategories.has(p.id) || !playerIdsWithAnyCategory.has(p.id)
+        );
 
   return (
     <div className="flex flex-col gap-6">
