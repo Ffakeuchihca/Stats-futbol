@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { CardChip } from "@/components/card-chip";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { Save } from "lucide-react";
 import type { MatchStat, Profile } from "@/types/database";
 
 type StatFields = Pick<
@@ -37,14 +39,12 @@ export function MatchStatsTable({
   initialStats,
   canEdit,
   currentPlayerId,
-  isMatchDay,
 }: {
   matchId: string;
   players: Profile[];
   initialStats: MatchStat[];
   canEdit: boolean;
   currentPlayerId: string;
-  isMatchDay: boolean;
 }) {
   const supabase = createClient();
   const initialMap: Record<string, StatFields> = {};
@@ -64,20 +64,8 @@ export function MatchStatsTable({
       : { ...EMPTY };
   }
   const [rows, setRows] = useState(initialMap);
-  const [savingId, setSavingId] = useState<string | null>(null);
-
-  async function persist(playerId: string, next: StatFields) {
-    setSavingId(playerId);
-    const { error } = await supabase.from("match_stats").upsert(
-      { match_id: matchId, player_id: playerId, ...next },
-      { onConflict: "match_id,player_id" }
-    );
-    setSavingId(null);
-    if (error) {
-      toast.error("No se pudo guardar la estadística", { description: error.message });
-      return;
-    }
-  }
+  const [dirty, setDirty] = useState<Set<string>>(new Set());
+  const [saving, setSaving] = useState(false);
 
   function update(playerId: string, patch: Partial<StatFields>) {
     setRows((prev) => {
@@ -86,10 +74,29 @@ export function MatchStatsTable({
       if (patch.titular === true) next.suplente = false;
       if (patch.suplente === true) next.titular = false;
       if (patch.convocado === false) next = { ...next, titular: false, suplente: false };
-      const updated = { ...prev, [playerId]: next };
-      persist(playerId, next);
-      return updated;
+      return { ...prev, [playerId]: next };
     });
+    setDirty((prev) => new Set(prev).add(playerId));
+  }
+
+  async function saveChanges() {
+    if (dirty.size === 0) return;
+    setSaving(true);
+    const payload = Array.from(dirty).map((playerId) => ({
+      match_id: matchId,
+      player_id: playerId,
+      ...rows[playerId],
+    }));
+    const { error } = await supabase
+      .from("match_stats")
+      .upsert(payload, { onConflict: "match_id,player_id" });
+    setSaving(false);
+    if (error) {
+      toast.error("No se pudo guardar la estadística", { description: error.message });
+      return;
+    }
+    toast.success("Estadísticas guardadas");
+    setDirty(new Set());
   }
 
   const visiblePlayers = canEdit ? players : players.filter((p) => p.id === currentPlayerId);
@@ -107,18 +114,34 @@ export function MatchStatsTable({
 
   return (
     <div className="flex flex-col gap-4">
-      {canEdit && (
-        <div className="flex flex-wrap items-center gap-5 font-mono text-sm text-muted-foreground">
-          <span>
-            Goles equipo: <strong className="text-foreground tabular-figures">{totals.goles}</strong>
-          </span>
-          <span>
-            Asistencias: <strong className="text-foreground tabular-figures">{totals.asistencias}</strong>
-          </span>
-          <CardChip color="yellow" count={totals.amarillas} label="Amarillas" />
-          <CardChip color="red" count={totals.rojas} label="Rojas" />
-        </div>
-      )}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        {canEdit ? (
+          <div className="flex flex-wrap items-center gap-5 font-mono text-sm text-muted-foreground">
+            <span>
+              Goles equipo: <strong className="text-foreground tabular-figures">{totals.goles}</strong>
+            </span>
+            <span>
+              Asistencias: <strong className="text-foreground tabular-figures">{totals.asistencias}</strong>
+            </span>
+            <CardChip color="yellow" count={totals.amarillas} label="Amarillas" />
+            <CardChip color="red" count={totals.rojas} label="Rojas" />
+          </div>
+        ) : (
+          <p className="text-xs text-muted-foreground">
+            Cargá tus estadísticas de este partido cuando quieras. El cuerpo técnico puede revisarlas y
+            corregirlas si hace falta.
+          </p>
+        )}
+        <Button
+          size="sm"
+          onClick={saveChanges}
+          disabled={dirty.size === 0 || saving}
+          className="gap-1.5"
+        >
+          <Save className="size-4" />
+          {saving ? "Guardando..." : dirty.size > 0 ? `Guardar cambios (${dirty.size})` : "Guardado"}
+        </Button>
+      </div>
 
       <div className="overflow-x-auto rounded-lg border">
         <table className="w-full min-w-[720px] text-sm">
@@ -138,15 +161,21 @@ export function MatchStatsTable({
           <tbody className="divide-y">
             {visiblePlayers.map((p) => {
               const r = rows[p.id];
-              const disabled = !canEdit && (p.id !== currentPlayerId || !isMatchDay);
+              const isDirty = dirty.has(p.id);
               return (
-                <tr key={p.id} className={savingId === p.id ? "opacity-60" : ""}>
-                  <td className="whitespace-nowrap px-3 py-2 font-medium">{p.full_name}</td>
+                <tr key={p.id} className={isDirty ? "bg-amber-500/5" : ""}>
+                  <td className="whitespace-nowrap px-3 py-2 font-medium">
+                    {p.full_name}
+                    {isDirty && (
+                      <span className="ml-1.5 align-middle text-[10px] font-mono uppercase tracking-wide text-amber-600">
+                        Sin guardar
+                      </span>
+                    )}
+                  </td>
                   <td className="px-3 py-2 text-center">
                     <input
                       type="checkbox"
                       checked={r.convocado}
-                      disabled={disabled}
                       onChange={(e) => update(p.id, { convocado: e.target.checked })}
                     />
                   </td>
@@ -154,7 +183,6 @@ export function MatchStatsTable({
                     <input
                       type="checkbox"
                       checked={r.titular}
-                      disabled={disabled}
                       onChange={(e) => update(p.id, { titular: e.target.checked, convocado: true })}
                     />
                   </td>
@@ -162,7 +190,6 @@ export function MatchStatsTable({
                     <input
                       type="checkbox"
                       checked={r.suplente}
-                      disabled={disabled}
                       onChange={(e) => update(p.id, { suplente: e.target.checked, convocado: true })}
                     />
                   </td>
@@ -171,7 +198,6 @@ export function MatchStatsTable({
                       type="number"
                       min={0}
                       max={130}
-                      disabled={disabled}
                       value={r.minutos_jugados}
                       onChange={(e) => update(p.id, { minutos_jugados: Number(e.target.value) })}
                       className="w-16"
@@ -181,7 +207,6 @@ export function MatchStatsTable({
                     <Input
                       type="number"
                       min={0}
-                      disabled={disabled}
                       value={r.goles}
                       onChange={(e) => update(p.id, { goles: Number(e.target.value) })}
                       className="w-14"
@@ -191,7 +216,6 @@ export function MatchStatsTable({
                     <Input
                       type="number"
                       min={0}
-                      disabled={disabled}
                       value={r.asistencias}
                       onChange={(e) => update(p.id, { asistencias: Number(e.target.value) })}
                       className="w-14"
@@ -202,7 +226,6 @@ export function MatchStatsTable({
                       type="number"
                       min={0}
                       max={2}
-                      disabled={disabled}
                       value={r.tarjetas_amarillas}
                       onChange={(e) => update(p.id, { tarjetas_amarillas: Number(e.target.value) })}
                       className={cn("w-14 border-l-2 tabular-figures", "border-l-card-yellow")}
@@ -213,7 +236,6 @@ export function MatchStatsTable({
                       type="number"
                       min={0}
                       max={1}
-                      disabled={disabled}
                       value={r.tarjetas_rojas}
                       onChange={(e) => update(p.id, { tarjetas_rojas: Number(e.target.value) })}
                       className={cn("w-14 border-l-2 tabular-figures", "border-l-card-red")}
@@ -225,14 +247,6 @@ export function MatchStatsTable({
           </tbody>
         </table>
       </div>
-
-      {!canEdit && (
-        <p className="text-xs text-muted-foreground">
-          {isMatchDay
-            ? "Cargá tus propias estadísticas de este partido. El cuerpo técnico puede revisarlas y corregirlas si hace falta."
-            : "Solo podés cargar tu estadística el día del partido."}
-        </p>
-      )}
     </div>
   );
 }

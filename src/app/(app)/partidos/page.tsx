@@ -19,21 +19,25 @@ export default async function PartidosPage() {
   const supabase = await createClient();
   const activeCategoryId = coach ? await getActiveCategoryId() : null;
 
-  const matchesQuery = supabase
-    .from("matches")
-    .select("*, match_categories!inner(category_id)")
-    .order("date", { ascending: false });
+  const matchesQuery = supabase.from("matches").select("*, match_categories!inner(category_id)");
 
   const [{ data: matches }, { data: categories }, { data: matchCategories }] = await Promise.all([
     activeCategoryId
       ? matchesQuery.eq("match_categories.category_id", activeCategoryId)
-      : supabase.from("matches").select("*").order("date", { ascending: false }),
+      : supabase.from("matches").select("*"),
     supabase.from("categories").select("*").order("name"),
     supabase.from("match_categories").select("match_id, category_id"),
   ]);
 
   const today = costaRicaTrainingDate();
-  const list = (matches ?? []) as unknown as Match[];
+  const todayTime = parseISO(today).getTime();
+  const list = ((matches ?? []) as unknown as Match[])
+    .slice()
+    .sort(
+      (a, b) =>
+        Math.abs(parseISO(a.date).getTime() - todayTime) -
+        Math.abs(parseISO(b.date).getTime() - todayTime)
+    );
   const categoryList = (categories ?? []) as Category[];
   const categoryById = new Map(categoryList.map((c) => [c.id, c.name]));
   const categoryIdsByMatch = new Map<string, string[]>();
