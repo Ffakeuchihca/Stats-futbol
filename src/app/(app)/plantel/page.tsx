@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EditPlayerDialog } from "@/components/roster/edit-player-dialog";
 import { CategoriesPanel } from "@/components/roster/categories-panel";
+import { GenerateReportButton } from "@/components/roster/generate-report-button";
 import { PageHeader } from "@/components/page-header";
 import { CardChip } from "@/components/card-chip";
 import type { Category, PlayerSeasonStats, Profile } from "@/types/database";
@@ -50,6 +51,7 @@ export default async function PlantelPage() {
         eyebrow="Plantilla"
         title="Plantel"
         description="Estadísticas acumuladas de la temporada: partidos, minutos, goles, asistencias y tarjetas."
+        actions={coach ? <GenerateReportButton /> : undefined}
       />
 
       {admin && <CategoriesPanel categories={categoryList} />}
