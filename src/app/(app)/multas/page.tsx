@@ -50,7 +50,7 @@ export default async function MultasPage() {
       <PageHeader
         eyebrow="Pizarrón"
         title="Multas"
-        description="Registrá y controlá las multas del plantel: $1000 por falta de uniforme, ausencia injustificada, llegada tardía o no llevar espinilleras."
+        description="Registrá y controlá las multas del plantel: $1000 por falta de uniforme, ausencia injustificada, llegada tardía, no llevar espinilleras o no registrar la asistencia a tiempo."
       />
       <CoachFines
         players={(players ?? []) as unknown as Profile[]}
