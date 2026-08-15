@@ -118,6 +118,34 @@ export interface PlayerSeasonStats {
   autoevaluacion_promedio: number | null;
 }
 
+export type TacticTokenKind = "own" | "rival" | "ball";
+
+export interface TacticToken {
+  id: string;
+  kind: TacticTokenKind;
+  label: string;
+  x: number;
+  y: number;
+}
+
+export interface Tactic {
+  id: string;
+  title: string;
+  notes: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TacticFrame {
+  id: string;
+  tactic_id: string;
+  position: number;
+  label: string | null;
+  duration_ms: number;
+  tokens: TacticToken[];
+}
+
 export interface PlayerFinesSummary {
   player_id: string;
   full_name: string;

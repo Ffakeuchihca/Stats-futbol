@@ -25,6 +25,7 @@ import {
   ShieldCheck,
   Repeat,
   MoreHorizontal,
+  Route,
 } from "lucide-react";
 import type { UserRole } from "@/types/database";
 import { cn } from "@/lib/utils";
@@ -34,6 +35,7 @@ const NAV_ITEMS = [
   { href: "/asistencia", label: "Asistencia", icon: CalendarCheck },
   { href: "/calendario", label: "Calendario", icon: CalendarRange },
   { href: "/partidos", label: "Partidos", icon: Trophy },
+  { href: "/tactica", label: "Táctica", icon: Route },
   { href: "/multas", label: "Multas", icon: Wallet },
   { href: "/plantel", label: "Plantel", icon: Users },
 ];
