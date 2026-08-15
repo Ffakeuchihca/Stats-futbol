@@ -252,7 +252,7 @@ export function TacticEditor({
           <CardTitle className="text-base">Cancha</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
             <Button type="button" variant="outline" size="sm" onClick={() => addToken("own")}>
               <User className="size-4" />
               Jugador
@@ -265,23 +265,31 @@ export function TacticEditor({
               <Circle className="size-4" />
               Balón
             </Button>
-            {selectedToken && (
-              <div className="flex items-center gap-2 border-l pl-2">
-                {selectedToken.kind !== "ball" && (
-                  <Input
-                    value={selectedToken.label}
-                    onChange={(e) => renameSelectedToken(e.target.value)}
-                    className="h-8 w-20"
-                    maxLength={3}
-                  />
-                )}
-                <Button type="button" variant="ghost" size="sm" onClick={removeSelectedToken}>
-                  <X className="size-4" />
-                  Quitar
-                </Button>
-              </div>
-            )}
           </div>
+
+          {selectedToken && (
+            <div className="flex flex-wrap items-center gap-2 rounded-lg border bg-muted/40 px-2.5 py-2">
+              <span className="text-xs text-muted-foreground">
+                {selectedToken.kind === "ball"
+                  ? "Balón seleccionado"
+                  : selectedToken.kind === "own"
+                  ? "Jugador seleccionado"
+                  : "Rival seleccionado"}
+              </span>
+              {selectedToken.kind !== "ball" && (
+                <Input
+                  value={selectedToken.label}
+                  onChange={(e) => renameSelectedToken(e.target.value)}
+                  className="h-8 w-16"
+                  maxLength={3}
+                />
+              )}
+              <Button type="button" variant="ghost" size="sm" onClick={removeSelectedToken}>
+                <X className="size-4" />
+                Quitar
+              </Button>
+            </div>
+          )}
 
           <PitchField
             tokens={activeFrame?.tokens ?? []}
@@ -339,7 +347,7 @@ export function TacticEditor({
             </Button>
           </div>
 
-          <div className="flex flex-wrap items-end gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="frame-label">Nombre del paso (opcional)</Label>
               <Input
@@ -347,7 +355,7 @@ export function TacticEditor({
                 value={activeFrame?.label ?? ""}
                 onChange={(e) => updateActiveFrame((f) => ({ ...f, label: e.target.value }))}
                 placeholder="Ej: Saque de banda"
-                className="w-56"
+                className="w-full sm:w-56"
               />
             </div>
             {activeIndex > 0 && (
@@ -362,7 +370,7 @@ export function TacticEditor({
                   onChange={(e) =>
                     updateActiveFrame((f) => ({ ...f, duration_ms: Number(e.target.value) || 1200 }))
                   }
-                  className="w-40"
+                  className="w-full sm:w-40"
                 />
               </div>
             )}

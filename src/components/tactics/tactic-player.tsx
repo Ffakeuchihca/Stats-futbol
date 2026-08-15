@@ -56,7 +56,7 @@ export function TacticPlayer({ frames }: { frames: PlayableFrame[] }) {
         transitionMs={currentFrame?.duration_ms ?? 800}
       />
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <div className="flex items-center gap-1.5">
           <Button variant="outline" size="sm" onClick={() => goTo(index - 1)} disabled={index === 0}>
             <ChevronLeft className="size-4" />
@@ -83,7 +83,7 @@ export function TacticPlayer({ frames }: { frames: PlayableFrame[] }) {
             Paso {index + 1}/{frames.length}
             {currentFrame?.label ? ` · ${currentFrame.label}` : ""}
           </span>
-          <div className="flex items-center gap-1">
+          <div className="flex flex-wrap items-center gap-1">
             {frames.map((_, i) => (
               <button
                 key={i}

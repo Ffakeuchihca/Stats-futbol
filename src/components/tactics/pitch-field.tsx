@@ -42,14 +42,29 @@ function PitchMarkings() {
 const TOKEN_STYLE: Record<TacticToken["kind"], string> = {
   own: "bg-primary text-primary-foreground border-white/80",
   rival: "bg-card-red text-card-red-foreground border-white/80",
-  ball: "bg-card-yellow text-card-yellow-foreground border-black/30",
+  ball: "bg-white text-neutral-900 border-black/40",
 };
 
 const TOKEN_SIZE: Record<TacticToken["kind"], string> = {
-  own: "size-8 text-xs sm:size-9 sm:text-sm",
-  rival: "size-8 text-xs sm:size-9 sm:text-sm",
-  ball: "size-4 sm:size-5",
+  own: "size-5 text-[9px] border sm:size-8 sm:text-xs sm:border-2 md:size-9 md:text-sm",
+  rival: "size-5 text-[9px] border sm:size-8 sm:text-xs sm:border-2 md:size-9 md:text-sm",
+  ball: "size-4 border sm:size-6 sm:border-2 md:size-7",
 };
+
+function BallGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-[68%] w-[68%]" aria-hidden="true">
+      <polygon points="12,7 16.8,10.5 15,16 9,16 7.2,10.5" fill="currentColor" />
+      <g stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+        <line x1="12" y1="7" x2="12" y2="2.4" />
+        <line x1="16.8" y1="10.5" x2="21" y2="8" />
+        <line x1="15" y1="16" x2="17.5" y2="20.2" />
+        <line x1="9" y1="16" x2="6.5" y2="20.2" />
+        <line x1="7.2" y1="10.5" x2="3" y2="8" />
+      </g>
+    </svg>
+  );
+}
 
 export function PitchField({
   tokens,
@@ -124,17 +139,18 @@ export function PitchField({
                 : `left ${transitionMs ?? 150}ms ease, top ${transitionMs ?? 150}ms ease`,
           }}
           className={cn(
-            "absolute flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 font-mono font-semibold shadow-card outline-none",
+            "absolute flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full font-mono font-semibold shadow-card outline-none",
             editable ? "cursor-grab active:cursor-grabbing" : "cursor-default",
             TOKEN_STYLE[token.kind],
             TOKEN_SIZE[token.kind],
-            selectedTokenId === token.id && "ring-2 ring-foreground ring-offset-2 ring-offset-field"
+            selectedTokenId === token.id &&
+              "ring-2 ring-offset-1 ring-foreground ring-offset-field sm:ring-offset-2"
           )}
           aria-label={
             token.kind === "ball" ? "Balón" : `${token.kind === "own" ? "Jugador" : "Rival"} ${token.label}`
           }
         >
-          {token.kind !== "ball" && token.label}
+          {token.kind === "ball" ? <BallGlyph /> : token.label}
         </button>
       ))}
     </div>
