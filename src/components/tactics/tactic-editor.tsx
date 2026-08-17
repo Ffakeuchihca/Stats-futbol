@@ -11,9 +11,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { CategoryCheckboxList } from "@/components/roster/category-checkbox-list";
 import { PitchField } from "@/components/tactics/pitch-field";
+import { TacticPlayer } from "@/components/tactics/tactic-player";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { Plus, X, User, ShieldAlert, Circle } from "lucide-react";
+import { Plus, X, User, ShieldAlert, Circle, Copy } from "lucide-react";
 import type { Category, Tactic, TacticFrame, TacticToken } from "@/types/database";
 
 interface EditableFrame {
@@ -64,6 +65,8 @@ export function TacticEditor({
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedTokenId, setSelectedTokenId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [duplicating, setDuplicating] = useState(false);
+  const [mode, setMode] = useState<"editar" | "reproducir">("editar");
 
   const activeFrame = frames[activeIndex];
   const selectedToken = activeFrame?.tokens.find((t) => t.id === selectedTokenId) ?? null;
@@ -204,6 +207,57 @@ export function TacticEditor({
     }
   }
 
+  async function handleDuplicate() {
+    if (!title.trim()) {
+      toast.error("Ponele un título a la táctica antes de duplicarla");
+      return;
+    }
+    if (categoryIds.length === 0) {
+      toast.error("Elegí al menos una categoría antes de duplicarla");
+      return;
+    }
+
+    setDuplicating(true);
+
+    const { data, error } = await supabase
+      .from("tactics")
+      .insert({ title: `${title.trim()} (copia)`, notes: notes.trim() || null })
+      .select("id")
+      .single();
+
+    if (error || !data) {
+      setDuplicating(false);
+      toast.error("No se pudo duplicar la táctica", { description: error?.message });
+      return;
+    }
+
+    const newTacticId = data.id;
+
+    await supabase
+      .from("tactic_categories")
+      .insert(categoryIds.map((category_id) => ({ tactic_id: newTacticId, category_id })));
+
+    const { error: framesError } = await supabase.from("tactic_frames").insert(
+      frames.map((f, i) => ({
+        tactic_id: newTacticId,
+        position: i,
+        label: f.label.trim() || null,
+        duration_ms: f.duration_ms,
+        tokens: f.tokens,
+      }))
+    );
+
+    setDuplicating(false);
+
+    if (framesError) {
+      toast.error("No se pudieron copiar los pasos", { description: framesError.message });
+      return;
+    }
+
+    toast.success("Táctica duplicada, ahora podés editar la copia");
+    router.push(`/tactica/${newTacticId}`);
+  }
+
   async function handleDelete() {
     if (!tactic) return;
     if (!window.confirm("¿Eliminar esta táctica? Esta acción no se puede deshacer.")) return;
@@ -248,63 +302,97 @@ export function TacticEditor({
       </Card>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2">
           <CardTitle className="text-base">Cancha</CardTitle>
+          <div className="flex overflow-hidden rounded-lg border">
+            <button
+              type="button"
+              onClick={() => setMode("editar")}
+              className={cn(
+                "px-3 py-1.5 text-xs font-medium outline-none transition-colors",
+                mode === "editar" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"
+              )}
+            >
+              Editar
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedTokenId(null);
+                setMode("reproducir");
+              }}
+              className={cn(
+                "px-3 py-1.5 text-xs font-medium outline-none transition-colors",
+                mode === "reproducir"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:bg-muted"
+              )}
+            >
+              Reproducir
+            </button>
+          </div>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
-          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-            <Button type="button" variant="outline" size="sm" onClick={() => addToken("own")}>
-              <User className="size-4" />
-              Jugador
-            </Button>
-            <Button type="button" variant="outline" size="sm" onClick={() => addToken("rival")}>
-              <ShieldAlert className="size-4" />
-              Rival
-            </Button>
-            <Button type="button" variant="outline" size="sm" onClick={() => addToken("ball")}>
-              <Circle className="size-4" />
-              Balón
-            </Button>
-          </div>
+          {mode === "reproducir" ? (
+            <TacticPlayer frames={frames} />
+          ) : (
+            <>
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <Button type="button" variant="outline" size="sm" onClick={() => addToken("own")}>
+                  <User className="size-4" />
+                  Jugador
+                </Button>
+                <Button type="button" variant="outline" size="sm" onClick={() => addToken("rival")}>
+                  <ShieldAlert className="size-4" />
+                  Rival
+                </Button>
+                <Button type="button" variant="outline" size="sm" onClick={() => addToken("ball")}>
+                  <Circle className="size-4" />
+                  Balón
+                </Button>
+              </div>
 
-          {selectedToken && (
-            <div className="flex flex-wrap items-center gap-2 rounded-lg border bg-muted/40 px-2.5 py-2">
-              <span className="text-xs text-muted-foreground">
-                {selectedToken.kind === "ball"
-                  ? "Balón seleccionado"
-                  : selectedToken.kind === "own"
-                  ? "Jugador seleccionado"
-                  : "Rival seleccionado"}
-              </span>
-              {selectedToken.kind !== "ball" && (
-                <Input
-                  value={selectedToken.label}
-                  onChange={(e) => renameSelectedToken(e.target.value)}
-                  className="h-8 w-16"
-                  maxLength={3}
-                />
+              {selectedToken && (
+                <div className="flex flex-wrap items-center gap-2 rounded-lg border bg-muted/40 px-2.5 py-2">
+                  <span className="text-xs text-muted-foreground">
+                    {selectedToken.kind === "ball"
+                      ? "Balón seleccionado"
+                      : selectedToken.kind === "own"
+                      ? "Jugador seleccionado"
+                      : "Rival seleccionado"}
+                  </span>
+                  {selectedToken.kind !== "ball" && (
+                    <Input
+                      value={selectedToken.label}
+                      onChange={(e) => renameSelectedToken(e.target.value)}
+                      className="h-8 w-16"
+                      maxLength={3}
+                    />
+                  )}
+                  <Button type="button" variant="ghost" size="sm" onClick={removeSelectedToken}>
+                    <X className="size-4" />
+                    Quitar
+                  </Button>
+                </div>
               )}
-              <Button type="button" variant="ghost" size="sm" onClick={removeSelectedToken}>
-                <X className="size-4" />
-                Quitar
-              </Button>
-            </div>
+
+              <PitchField
+                tokens={activeFrame?.tokens ?? []}
+                editable
+                selectedTokenId={selectedTokenId}
+                onSelectToken={setSelectedTokenId}
+                onMoveToken={moveToken}
+              />
+
+              <p className="text-xs text-muted-foreground">
+                Arrastrá las fichas para ubicarlas. Los cambios se guardan en el paso seleccionado abajo.
+              </p>
+            </>
           )}
-
-          <PitchField
-            tokens={activeFrame?.tokens ?? []}
-            editable
-            selectedTokenId={selectedTokenId}
-            onSelectToken={setSelectedTokenId}
-            onMoveToken={moveToken}
-          />
-
-          <p className="text-xs text-muted-foreground">
-            Arrastrá las fichas para ubicarlas. Los cambios se guardan en el paso seleccionado abajo.
-          </p>
         </CardContent>
       </Card>
 
+      {mode === "editar" && (
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Pasos del movimiento</CardTitle>
@@ -380,12 +468,19 @@ export function TacticEditor({
           </div>
         </CardContent>
       </Card>
+      )}
 
       <div className="flex flex-wrap items-center justify-between gap-2">
         {tactic ? (
-          <Button type="button" variant="ghost" className="text-destructive" onClick={handleDelete}>
-            Eliminar táctica
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button type="button" variant="outline" onClick={handleDuplicate} disabled={duplicating}>
+              <Copy className="size-4" />
+              Duplicar
+            </Button>
+            <Button type="button" variant="ghost" className="text-destructive" onClick={handleDelete}>
+              Eliminar táctica
+            </Button>
+          </div>
         ) : (
           <span />
         )}
